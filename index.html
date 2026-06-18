@@ -154,6 +154,14 @@
         <section id="screen-highscores" class="screen hidden">
             <div class="glass-card">
                 <h2 class="text-center gradient-text">Global Top 10</h2>
+                
+                <div class="tabs mt-3" id="score-tabs">
+                    <button class="tab-btn" onclick="app.loadHighScores('easy', this)">Easy</button>
+                    <button class="tab-btn active" onclick="app.loadHighScores('medium', this)">Medium</button>
+                    <button class="tab-btn" onclick="app.loadHighScores('hard', this)">Hard</button>
+                    <button class="tab-btn" onclick="app.loadHighScores('expert', this)">Expert</button>
+                </div>
+
                 <div id="highscores-list" class="scores-list mt-4">
                     <!-- Scores populated via JS -->
                 </div>

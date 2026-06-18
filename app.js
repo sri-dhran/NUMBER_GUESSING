@@ -253,7 +253,7 @@ const app = {
 
     async isHighScore(score) {
         try {
-            const res = await fetch(`${API_BASE}/api/scores`);
+            const res = await fetch(`${API_BASE}/api/scores?difficulty=${state.difficulty}`);
             const scores = await res.json();
             if (scores.length < 10) return true;
             return score > scores[scores.length - 1].score;
@@ -321,12 +321,26 @@ const app = {
         document.getElementById('stat-avg').textContent = avg;
     },
 
-    async loadHighScores() {
+    async loadHighScores(difficulty = 'medium', btnElement = null) {
+        if (btnElement) {
+            document.querySelectorAll('#score-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        } else {
+            // Default selection highlight
+            document.querySelectorAll('#score-tabs .tab-btn').forEach(btn => {
+                if (btn.innerText.toLowerCase() === difficulty) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
         const list = document.getElementById('highscores-list');
         list.innerHTML = '<p class="text-center text-secondary mt-3">Loading global scores...</p>';
         
         try {
-            const res = await fetch(`${API_BASE}/api/scores`);
+            const res = await fetch(`${API_BASE}/api/scores?difficulty=${difficulty}`);
             const scores = await res.json();
             
             if (scores.length === 0) {

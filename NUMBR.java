@@ -24,10 +24,13 @@ public class NUMBR {
     }
 
     private static Map<String, GameState> sessions = new HashMap<>();
-    private static List<String> highScores = new ArrayList<>();
-    private static final String SCORES_FILE = "scores.json";
+    private static Map<String, List<String>> highScoresMap = new HashMap<>();
+    private static final String[] DIFFICULTIES = {"easy", "medium", "hard", "expert"};
 
     public static void main(String[] args) throws IOException {
+        for (String d : DIFFICULTIES) {
+            highScoresMap.put(d, new ArrayList<>());
+        }
         loadScores();
 
         // Render.com sets PORT env variable; fallback to 8080 locally
@@ -175,8 +178,14 @@ public class NUMBR {
         @Override
         public void handle(HttpExchange t) throws IOException {
             if ("GET".equals(t.getRequestMethod())) {
-                String jsonArr = "[" + String.join(",", highScores) + "]";
+                String query = t.getRequestURI().getQuery();
+                Map<String, String> params = parseQuery(query);
+                String diff = params.getOrDefault("difficulty", "medium");
+                
+                List<String> diffScores = highScoresMap.getOrDefault(diff, new ArrayList<>());
+                String jsonArr = "[" + String.join(",", diffScores) + "]";
                 sendResponse(t, 200, jsonArr);
+                
             } else if ("POST".equals(t.getRequestMethod())) {
                 String body = getBody(t);
                 Map<String, String> params = parseQuery(body);
@@ -196,26 +205,32 @@ public class NUMBR {
                         String scoreObj = String.format("{\"name\":\"%s\", \"score\":%d, \"date\":\"%s\"}", 
                             cleanName, score, date);
                         
-                        highScores.add(scoreObj);
+                        String diff = state.difficulty;
+                        List<String> diffScores = highScoresMap.getOrDefault(diff, new ArrayList<>());
+                        diffScores.add(scoreObj);
                         
                         // Delete session so the score can't be submitted twice
                         sessions.remove(sessionId);
                         
                         // Simple sort descending by score
-                        highScores.sort((a, b) -> {
+                        diffScores.sort((a, b) -> {
                             int scoreA = Integer.parseInt(a.split("\"score\":")[1].split(",")[0].trim());
                             int scoreB = Integer.parseInt(b.split("\"score\":")[1].split(",")[0].trim());
                             return Integer.compare(scoreB, scoreA);
                         });
                         
-                        if (highScores.size() > 10) {
-                            highScores = highScores.subList(0, 10);
+                        if (diffScores.size() > 10) {
+                            diffScores = diffScores.subList(0, 10);
                         }
-                        saveScores();
+                        highScoresMap.put(diff, diffScores);
+                        saveScores(diff);
+                        
+                        String jsonArr = "[" + String.join(",", diffScores) + "]";
+                        sendResponse(t, 200, jsonArr);
+                        return;
                     }
                 }
-                String jsonArr = "[" + String.join(",", highScores) + "]";
-                sendResponse(t, 200, jsonArr);
+                sendResponse(t, 400, "{\"error\":\"Invalid session\"}");
             }
         }
     }
@@ -300,30 +315,52 @@ public class NUMBR {
     }
 
     private static void loadScores() {
+        // Migrate old scores.json if it exists
         try {
-            Path p = Paths.get(SCORES_FILE);
-            if (Files.exists(p)) {
-                String content = new String(Files.readAllBytes(p));
+            Path oldPath = Paths.get("scores.json");
+            if (Files.exists(oldPath)) {
+                String content = new String(Files.readAllBytes(oldPath));
                 if (content.startsWith("[")) {
-                    // Quick and dirty manual JSON array extraction
                     content = content.substring(1, content.length() - 1);
                     if (!content.trim().isEmpty()) {
                         String[] objs = content.split("(?<=}),(?=\\{)");
+                        List<String> mediumScores = highScoresMap.get("medium");
                         for (String obj : objs) {
-                            highScores.add(obj.trim());
+                            mediumScores.add(obj.trim());
+                        }
+                        saveScores("medium");
+                    }
+                }
+                Files.delete(oldPath);
+            }
+        } catch (Exception e) {}
+
+        // Load new difficulty-specific files
+        for (String d : DIFFICULTIES) {
+            try {
+                Path p = Paths.get("scores_" + d + ".json");
+                if (Files.exists(p)) {
+                    String content = new String(Files.readAllBytes(p));
+                    if (content.startsWith("[")) {
+                        content = content.substring(1, content.length() - 1);
+                        if (!content.trim().isEmpty()) {
+                            String[] objs = content.split("(?<=}),(?=\\{)");
+                            List<String> diffScores = highScoresMap.get(d);
+                            for (String obj : objs) {
+                                diffScores.add(obj.trim());
+                            }
                         }
                     }
                 }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            } catch (Exception e) {}
         }
     }
 
-    private static void saveScores() {
+    private static void saveScores(String difficulty) {
         try {
-            String jsonArr = "[\n" + String.join(",\n", highScores) + "\n]";
-            Files.write(Paths.get(SCORES_FILE), jsonArr.getBytes());
+            List<String> scores = highScoresMap.getOrDefault(difficulty, new ArrayList<>());
+            String jsonArr = "[\n" + String.join(",\n", scores) + "\n]";
+            Files.write(Paths.get("scores_" + difficulty + ".json"), jsonArr.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }
