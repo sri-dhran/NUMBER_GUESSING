@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-guess-v1';
+const CACHE_NAME = 'smart-guess-v2';
 const ASSETS = [
     './',
     './index.html',
