@@ -18,9 +18,102 @@
 
 <body>
     <div id="space-bg">
-        <div class="stars1"></div>
-        <div class="stars2"></div>
-        <div class="stars3"></div>
+        <!-- Nebula glows -->
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+        
+        <!-- Twinkling stars -->
+        <div class="twinkle-star star-1"></div>
+        <div class="twinkle-star star-2"></div>
+        <div class="twinkle-star star-3"></div>
+        <div class="twinkle-star star-4"></div>
+        <div class="twinkle-star star-5"></div>
+        
+        <!-- Animated floating planet -->
+        <div class="planet planet-gas">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="30" fill="url(#planetGrad)" />
+                <ellipse cx="50" cy="50" rx="45" ry="10" fill="rgba(255,255,255,0.15)" stroke="url(#ringGrad)" stroke-width="6" transform="rotate(-15 50 50)" />
+                <defs>
+                    <linearGradient id="planetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ff7b00" />
+                        <stop offset="50%" stop-color="#ff007c" />
+                        <stop offset="100%" stop-color="#3b0066" />
+                    </linearGradient>
+                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="rgba(255, 123, 0, 0)" />
+                        <stop offset="50%" stop-color="#00e5ff" stop-opacity="0.8" />
+                        <stop offset="100%" stop-color="rgba(59, 0, 102, 0)" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- Another cute planet -->
+        <div class="planet planet-ring">
+            <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="18" fill="url(#planetGrad2)" />
+                <defs>
+                    <radialGradient id="planetGrad2" cx="30%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="#00ffcc" />
+                        <stop offset="70%" stop-color="#0066ff" />
+                        <stop offset="100%" stop-color="#050a30" />
+                    </radialGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- Floating UFO -->
+        <div class="space-ufo">
+            <svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+                <!-- Dome -->
+                <path d="M 30,30 A 20,20 0 0,1 70,30 Z" fill="#00e5ff" opacity="0.8" />
+                <circle cx="50" cy="22" r="6" fill="#fff" opacity="0.9" filter="drop-shadow(0 0 4px #fff)" />
+                <!-- Saucer body -->
+                <ellipse cx="50" cy="35" rx="40" ry="12" fill="#0a5c8c" stroke="#00e5ff" stroke-width="2" />
+                <ellipse cx="50" cy="35" rx="35" ry="8" fill="#1572a1" />
+                <!-- Lights -->
+                <circle cx="25" cy="35" r="3" fill="#ffef5c" />
+                <circle cx="37" cy="38" r="3" fill="#ffef5c" />
+                <circle cx="50" cy="39" r="3" fill="#ffef5c" />
+                <circle cx="63" cy="38" r="3" fill="#ffef5c" />
+                <circle cx="75" cy="35" r="3" fill="#ffef5c" />
+                <!-- Beam -->
+                <polygon points="40,40 25,60 75,60 60,40" fill="url(#beamGrad)" opacity="0.3" />
+                <defs>
+                    <linearGradient id="beamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#00e5ff" />
+                        <stop offset="100%" stop-color="#00e5ff" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- Drifting Rocket -->
+        <div class="space-rocket">
+            <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                <g transform="rotate(45 40 40)">
+                    <!-- Flame -->
+                    <path d="M 35,55 L 40,75 L 45,55 Z" fill="#ff4d00" />
+                    <path d="M 37,55 L 40,68 L 43,55 Z" fill="#ffbc00" />
+                    <!-- Fins -->
+                    <path d="M 25,40 L 18,52 L 30,48 Z" fill="#e6005c" />
+                    <path d="M 55,40 L 62,52 L 50,48 Z" fill="#e6005c" />
+                    <!-- Body -->
+                    <path d="M 30,45 L 30,25 Q 40,0 50,25 L 50,45 Z" fill="#f0f4f8" />
+                    <!-- Nose cone -->
+                    <path d="M 30,25 Q 40,0 50,25 Z" fill="#e6005c" />
+                    <!-- Window -->
+                    <circle cx="40" cy="30" r="6" fill="#00e5ff" stroke="#a0aec0" stroke-width="2" />
+                    <circle cx="38" cy="28" r="2" fill="#fff" opacity="0.8" />
+                </g>
+            </svg>
+        </div>
+
+        <!-- Shooting Star -->
+        <div class="shooting-star meteor-1"></div>
+        <div class="shooting-star meteor-2"></div>
     </div>
     <div class="scanlines"></div>
     <div id="app" class="dark-mode">
