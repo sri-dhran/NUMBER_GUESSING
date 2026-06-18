@@ -1,9 +1,7 @@
 services:
   - type: web
     name: number-guessing-backend
-    runtime: java
-    buildCommand: javac NUMBR.java
-    startCommand: java NUMBR
+    env: docker
     plan: free
     envVars:
       - key: PORT
