@@ -1,0 +1,8 @@
+# Java compiled files
+*.class
+
+# macOS
+.DS_Store
+
+# Scores (server will create this)
+scores.json

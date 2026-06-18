@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: number-guessing-backend
+    runtime: java
+    buildCommand: javac NUMBR.java
+    startCommand: java NUMBR
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080

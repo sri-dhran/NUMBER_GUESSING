@@ -29,7 +29,11 @@ public class NUMBR {
     public static void main(String[] args) throws IOException {
         loadScores();
 
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        // Render.com sets PORT env variable; fallback to 8080 locally
+        String portEnv = System.getenv("PORT");
+        int port = (portEnv != null) ? Integer.parseInt(portEnv) : 8080;
+
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         
         server.createContext("/api/start", new StartHandler());
         server.createContext("/api/guess", new GuessHandler());

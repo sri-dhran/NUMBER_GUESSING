@@ -40,7 +40,13 @@ const sfx = {
     }
 };
 
-const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
+// When running on GitHub Pages, connect to Render backend
+// When running via Java server locally, use relative paths
+const isGitHubPages = window.location.hostname.includes('github.io');
+const isLocalFile = window.location.protocol === 'file:';
+const RENDER_BACKEND = 'https://number-guessing-backend.onrender.com';
+
+const API_BASE = (isGitHubPages || isLocalFile) ? RENDER_BACKEND : '';
 
 // Application State
 const state = {
