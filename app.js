@@ -44,7 +44,7 @@ const sfx = {
 // When running via Java server locally, use relative paths
 const isGitHubPages = window.location.hostname.includes('github.io');
 const isLocalFile = window.location.protocol === 'file:';
-const RENDER_BACKEND = 'https://number-guessing-backend.onrender.com';
+const RENDER_BACKEND = 'https://number-guessing-backend-tk5t.onrender.com';
 
 const API_BASE = (isGitHubPages || isLocalFile) ? RENDER_BACKEND : '';
 
