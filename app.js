@@ -265,13 +265,13 @@ const app = {
 
     async saveHighScore(score) {
         const input = document.getElementById('player-name');
-        if (!document.getElementById('new-highscore-input').classList.contains('hidden')) {
+        if (!document.getElementById('new-highscore-input').classList.contains('hidden') && state.sessionId) {
             const name = input.value.trim() || 'Anonymous';
             try {
                 await fetch(`${API_BASE}/api/scores`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `name=${encodeURIComponent(name)}&score=${score}`
+                    body: `name=${encodeURIComponent(name)}&sessionId=${state.sessionId}`
                 });
             } catch (e) {
                 console.error("Could not save to global leaderboard");

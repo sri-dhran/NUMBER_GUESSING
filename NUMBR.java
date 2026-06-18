@@ -20,6 +20,7 @@ public class NUMBR {
         String difficulty;
         int maxRange;
         boolean withHint;
+        long lastActive;
     }
 
     private static Map<String, GameState> sessions = new HashMap<>();
@@ -74,6 +75,10 @@ public class NUMBR {
                 state.gameOver = false;
                 state.difficulty = diff;
                 state.withHint = withHint;
+                state.lastActive = System.currentTimeMillis();
+
+                // Cleanup stale sessions (older than 1 hour)
+                sessions.entrySet().removeIf(entry -> System.currentTimeMillis() - entry.getValue().lastActive > 3600000);
 
                 String sessionId = UUID.randomUUID().toString();
                 sessions.put(sessionId, state);
@@ -101,6 +106,8 @@ public class NUMBR {
                 }
 
                 GameState state = sessions.get(sessionId);
+                state.lastActive = System.currentTimeMillis();
+                
                 if (state.gameOver) {
                     sendResponse(t, 400, "{\"error\":\"Game is already over\"}");
                     return;
@@ -174,27 +181,38 @@ public class NUMBR {
                 String body = getBody(t);
                 Map<String, String> params = parseQuery(body);
                 String name = params.getOrDefault("name", "Anonymous");
-                String scoreStr = params.get("score");
+                String sessionId = params.get("sessionId");
                 
-                if (scoreStr != null) {
-                    String date = new java.text.SimpleDateFormat("MM/dd/yyyy").format(new java.util.Date());
-                    // Create a simple JSON object string
-                    String scoreObj = String.format("{\"name\":\"%s\", \"score\":%s, \"date\":\"%s\"}", 
-                        name.replace("\"", ""), scoreStr, date);
+                if (sessionId != null && sessions.containsKey(sessionId)) {
+                    GameState state = sessions.get(sessionId);
                     
-                    highScores.add(scoreObj);
-                    
-                    // Simple sort descending by score
-                    highScores.sort((a, b) -> {
-                        int scoreA = Integer.parseInt(a.split("\"score\":")[1].split(",")[0].trim());
-                        int scoreB = Integer.parseInt(b.split("\"score\":")[1].split(",")[0].trim());
-                        return Integer.compare(scoreB, scoreA);
-                    });
-                    
-                    if (highScores.size() > 10) {
-                        highScores = highScores.subList(0, 10);
+                    // Verify the game was actually won
+                    if (state.gameOver && state.count <= state.maxAttempts && state.count > 0) {
+                        int score = Math.max(0, 100 - (state.count * 10));
+                        String date = new java.text.SimpleDateFormat("MM/dd/yyyy").format(new java.util.Date());
+                        
+                        String cleanName = sanitizeHtml(name);
+                        
+                        String scoreObj = String.format("{\"name\":\"%s\", \"score\":%d, \"date\":\"%s\"}", 
+                            cleanName, score, date);
+                        
+                        highScores.add(scoreObj);
+                        
+                        // Delete session so the score can't be submitted twice
+                        sessions.remove(sessionId);
+                        
+                        // Simple sort descending by score
+                        highScores.sort((a, b) -> {
+                            int scoreA = Integer.parseInt(a.split("\"score\":")[1].split(",")[0].trim());
+                            int scoreB = Integer.parseInt(b.split("\"score\":")[1].split(",")[0].trim());
+                            return Integer.compare(scoreB, scoreA);
+                        });
+                        
+                        if (highScores.size() > 10) {
+                            highScores = highScores.subList(0, 10);
+                        }
+                        saveScores();
                     }
-                    saveScores();
                 }
                 String jsonArr = "[" + String.join(",", highScores) + "]";
                 sendResponse(t, 200, jsonArr);
@@ -232,9 +250,24 @@ public class NUMBR {
 
     // --- Helpers ---
     
+    private static String sanitizeHtml(String input) {
+        if (input == null) return "Anonymous";
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;");
+    }
+
     private static void sendResponse(HttpExchange t, int statusCode, String response) throws IOException {
-        // Add CORS
-        t.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        // Restrict CORS
+        String origin = t.getRequestHeaders().getFirst("Origin");
+        if (origin != null && (origin.equals("https://sri-dhran.github.io") || origin.startsWith("http://localhost"))) {
+            t.getResponseHeaders().add("Access-Control-Allow-Origin", origin);
+        } else {
+            t.getResponseHeaders().add("Access-Control-Allow-Origin", "https://sri-dhran.github.io");
+        }
+        
         t.getResponseHeaders().add("Content-Type", "application/json");
         byte[] bytes = response.getBytes();
         t.sendResponseHeaders(statusCode, bytes.length);
