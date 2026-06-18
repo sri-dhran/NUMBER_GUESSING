@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Number Guessing Game</title>
+    <meta name="description" content="A premium progressive web app for playing the number guessing game.">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app" class="dark-mode">
+        <!-- Audio Controls -->
+        <button id="soundToggle" class="icon-btn" aria-label="Toggle Sound">
+            <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <svg id="icon-sound-off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+        </button>
+
+        <!-- Home Screen -->
+        <section id="screen-home" class="screen active">
+            <div class="glass-card text-center">
+                <div class="logo-container">
+                    <div class="logo-circle">
+                        <span>?</span>
+                    </div>
+                </div>
+                <h1 class="gradient-text">Smart Guess</h1>
+                <p class="subtitle">The ultimate number guessing experience</p>
+
+                <div class="menu-buttons">
+                    <button class="btn btn-primary btn-large" onclick="app.showScreen('screen-difficulty')">Start Game</button>
+                    <button class="btn btn-secondary" onclick="app.showScreen('screen-highscores')">Global Scores</button>
+                    <div class="btn-row">
+                        <button class="btn btn-outline" onclick="app.showScreen('screen-stats')">Statistics</button>
+                        <button class="btn btn-outline" onclick="app.showScreen('screen-about')">Instructions</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Difficulty Screen -->
+        <section id="screen-difficulty" class="screen hidden">
+            <div class="glass-card text-center">
+                <h2>Select Difficulty</h2>
+                
+                <div class="hint-toggle-container mb-4">
+                    <label class="toggle">
+                        <input type="checkbox" id="hint-toggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Play with Hints</span>
+                </div>
+
+                <div class="difficulty-grid">
+                    <button class="btn btn-diff easy" onclick="app.startGame('easy')">
+                        <span class="diff-title">Easy</span>
+                        <span class="diff-desc">1 - 50 | 5 Attempts</span>
+                    </button>
+                    <button class="btn btn-diff medium" onclick="app.startGame('medium')">
+                        <span class="diff-title">Medium</span>
+                        <span class="diff-desc">1 - 100 | 7 Attempts</span>
+                    </button>
+                    <button class="btn btn-diff hard" onclick="app.startGame('hard')">
+                        <span class="diff-title">Hard</span>
+                        <span class="diff-desc">1 - 500 | 9 Attempts</span>
+                    </button>
+                    <button class="btn btn-diff expert" onclick="app.startGame('expert')">
+                        <span class="diff-title">Expert</span>
+                        <span class="diff-desc">1 - 1000 | 10 Attempts</span>
+                    </button>
+                </div>
+                <button class="btn btn-text mt-4" onclick="app.showScreen('screen-home')">Back to Home</button>
+            </div>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="screen-game" class="screen hidden">
+            <div class="game-header">
+                <button class="icon-btn" onclick="app.confirmQuit()" aria-label="Quit Game">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="stats-bar">
+                    <div class="stat-pill"><span id="game-attempts">6</span> left</div>
+                </div>
+            </div>
+
+            <div class="glass-card game-card text-center">
+                <div class="game-prompt">
+                    <h2 id="game-range-text">Guess between 1 and 100</h2>
+                    <div id="hint-display" class="hint-display fade-in"></div>
+                </div>
+
+                <div class="input-container" id="guess-container">
+                    <input type="number" id="guess-input" placeholder="0" min="1" autocomplete="off" />
+                </div>
+
+                <div class="progress-bar-container">
+                    <div id="attempts-progress" class="progress-bar"></div>
+                </div>
+
+                <button id="submit-guess" class="btn btn-primary btn-large w-100 mt-4"
+                    onclick="app.submitGuess()">Submit Guess</button>
+
+                <div id="game-feedback" class="feedback-msg"></div>
+            </div>
+
+            <!-- Confetti Canvas -->
+            <canvas id="confetti-canvas"></canvas>
+        </section>
+
+        <!-- Game Over / Victory Modal -->
+        <div id="game-over-modal" class="modal hidden">
+            <div class="glass-card text-center">
+                <h2 id="end-title" class="gradient-text">Victory!</h2>
+                <div class="end-stats">
+                    <p>The number was <strong id="end-number" class="highlight">42</strong></p>
+                    <p class="final-score">Score: <span id="end-score">100</span></p>
+                </div>
+                <div id="new-highscore-input" class="hidden mt-3">
+                    <p>New Global High Score!</p>
+                    <input type="text" id="player-name" placeholder="Enter your name" maxlength="15">
+                </div>
+                <div class="modal-actions mt-4">
+                    <button class="btn btn-primary" onclick="app.saveAndRestart()">Play Again</button>
+                    <button class="btn btn-secondary" onclick="app.saveAndHome()">Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- High Scores Screen -->
+        <section id="screen-highscores" class="screen hidden">
+            <div class="glass-card">
+                <h2 class="text-center gradient-text">Global Top 10</h2>
+                <div id="highscores-list" class="scores-list mt-4">
+                    <!-- Scores populated via JS -->
+                </div>
+                <button class="btn btn-outline w-100 mt-4" onclick="app.showScreen('screen-home')">Back</button>
+            </div>
+        </section>
+
+        <!-- Statistics Screen -->
+        <section id="screen-stats" class="screen hidden">
+            <div class="glass-card">
+                <h2 class="text-center gradient-text">Your Statistics</h2>
+                <div class="stats-grid mt-4">
+                    <div class="stat-box">
+                        <span class="stat-value" id="stat-played">0</span>
+                        <span class="stat-label">Games Played</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="stat-wins">0</span>
+                        <span class="stat-label">Wins</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="stat-losses">0</span>
+                        <span class="stat-label">Losses</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="stat-avg">0</span>
+                        <span class="stat-label">Avg Score</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline w-100 mt-4" onclick="app.showScreen('screen-home')">Back</button>
+            </div>
+        </section>
+
+        <!-- Instructions Screen -->
+        <section id="screen-about" class="screen hidden">
+            <div class="glass-card instructions">
+                <h2 class="text-center gradient-text">How to Play</h2>
+                <div class="instruction-content">
+                    <p>Guess the hidden number within the given attempts to score points!</p>
+                    <ul>
+                        <li><strong>Easy:</strong> 1-50, 5 attempts</li>
+                        <li><strong>Medium:</strong> 1-100, 7 attempts</li>
+                        <li><strong>Hard:</strong> 1-500, 9 attempts</li>
+                        <li><strong>Expert:</strong> 1-1000, 10 attempts</li>
+                    </ul>
+                    <h3>Scoring</h3>
+                    <p>You start with 100 points. For every attempt taken, 10 points are deducted. Faster guesses earn
+                        higher scores!</p>
+                    <h3>Hints</h3>
+                    <p>If you play with hints enabled, you will get a helpful clue after every wrong guess!</p>
+                </div>
+                <button class="btn btn-outline w-100 mt-4" onclick="app.showScreen('screen-home')">Got it</button>
+            </div>
+        </section>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast hidden">Message</div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
