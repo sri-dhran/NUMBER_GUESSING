@@ -40,6 +40,8 @@ const sfx = {
     }
 };
 
+const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
+
 // Application State
 const state = {
     currentScreen: 'screen-home',
@@ -100,7 +102,7 @@ const app = {
         const withHint = document.getElementById('hint-toggle') ? document.getElementById('hint-toggle').checked : true;
         
         try {
-            const res = await fetch('/api/start', {
+            const res = await fetch(`${API_BASE}/api/start`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `difficulty=${state.difficulty}&withHint=${withHint}`
@@ -159,7 +161,7 @@ const app = {
         }
 
         try {
-            const res = await fetch('/api/guess', {
+            const res = await fetch(`${API_BASE}/api/guess`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `sessionId=${state.sessionId}&guess=${guess}`
@@ -245,7 +247,7 @@ const app = {
 
     async isHighScore(score) {
         try {
-            const res = await fetch('/api/scores');
+            const res = await fetch(`${API_BASE}/api/scores`);
             const scores = await res.json();
             if (scores.length < 10) return true;
             return score > scores[scores.length - 1].score;
@@ -260,7 +262,7 @@ const app = {
         if (!document.getElementById('new-highscore-input').classList.contains('hidden')) {
             const name = input.value.trim() || 'Anonymous';
             try {
-                await fetch('/api/scores', {
+                await fetch(`${API_BASE}/api/scores`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `name=${encodeURIComponent(name)}&score=${score}`
@@ -318,7 +320,7 @@ const app = {
         list.innerHTML = '<p class="text-center text-secondary mt-3">Loading global scores...</p>';
         
         try {
-            const res = await fetch('/api/scores');
+            const res = await fetch(`${API_BASE}/api/scores`);
             const scores = await res.json();
             
             if (scores.length === 0) {
